@@ -68,6 +68,7 @@ public class Utility {
                     county.setCountyCode(array[0]);
                     county.setCountyName(array[1]);
                     county.setCityId(cityId);
+                    coolWeatherDB.saveCounty(county);
                 }
                 return true;
             }
