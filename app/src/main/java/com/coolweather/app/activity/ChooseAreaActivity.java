@@ -2,8 +2,12 @@ package com.coolweather.app.activity;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -56,6 +60,13 @@ public class ChooseAreaActivity extends Activity {
     @Override
     protected void onCreate(Bundle saveInstanceState) {
         super.onCreate(saveInstanceState);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if(prefs.getBoolean("city_selected", false)) {
+            Intent intent = new Intent(this, WeatherActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.choose_area);
         listView = (ListView) findViewById(R.id.list_view);
@@ -72,6 +83,12 @@ public class ChooseAreaActivity extends Activity {
                 } else if(currentLevel == LEVEL_CITY) {
                     selectedCity = cityList.get(index);
                     queryCounties();
+                } else if(currentLevel == LEVEL_COUNTY) {
+                    String countyCode = countyList.get(index).getCountyCode();
+                    Intent intent = new Intent(ChooseAreaActivity.this, WeatherActivity.class);
+                    intent.putExtra("county_code", countyCode);
+                    startActivity(intent);
+                    finish();
                 }
             }
         });
@@ -131,6 +148,7 @@ public class ChooseAreaActivity extends Activity {
             titleText.setText(selectedCity.getCityName());
             currentLevel = LEVEL_COUNTY;
         } else {
+            Log.d("ChooseAreaActivity", "zhengjh queryCounties() selectedCity=" + selectedCity.getCityName());
             queryFromServer(selectedCity.getCityCode(), "county");
         }
     }
@@ -140,6 +158,7 @@ public class ChooseAreaActivity extends Activity {
     */
     private void queryFromServer(final String code, final String type) {
         String address;
+        Log.d("ChooseAreaActivity", "zhengjh queryFromServer code = "+code+", type=" + type);
         if(!TextUtils.isEmpty(code)) {
             address = "http://www.weather.com.cn/data/list3/city" + code + ".xml";
         } else {
